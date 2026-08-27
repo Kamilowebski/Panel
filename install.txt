@@ -1,0 +1,16 @@
+Zainstalować Python 3 z python.org.
+Przy instalacji zaznaczyć Add Python to PATH.
+Skopiować cały folder aplikacji:app.py
+index.html
+devices.json
+config.json
+folder static
+
+Uruchomić w PowerShellu:
+cd C:\sciezka\do\folderu
+python app.py
+Wejść w przeglądarce:
+http://localhost:5000
+Jeśli mają wchodzić inne komputery z sieci, trzeba użyć IP tego komputera, np.:
+http://192.168.1.10:5000
+i ewentualnie dopuścić port 5000 w Zaporze Windows.

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel urządzeń</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("devicePanelTheme");
+        var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        if (theme === "dark") {
+          document.documentElement.classList.add("theme-dark");
+        }
+      } catch (error) {
+        /* ignore storage errors */
+      }
+    })();
+  </script>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Panel urządzeń</h1>
+        <p>Terminale, komputery, drukarki, Bizerby i inne urządzenia w sieci.</p>
+      </div>
+      <div class="topActions">
+        <button id="themeToggleButton" class="themeToggle" type="button" title="Przełącz motyw">🌙</button>
+      </div>
+    </header>
+
+    <section class="controls">
+      <input id="searchInput" type="search" placeholder="Szukaj: nazwa, IP, obszar, typ, słowo kluczowe">
+      <select id="typeFilter">
+        <option value="">Wszystkie typy</option>
+      </select>
+      <select id="areaFilter">
+        <option value="">Wszystkie obszary</option>
+      </select>
+      <select id="sortSelect">
+        <option value="name">Sortuj: nazwa</option>
+        <option value="area">Sortuj: obszar</option>
+        <option value="type">Sortuj: typ</option>
+        <option value="ip">Sortuj: IP</option>
+        <option value="status">Sortuj: status</option>
+      </select>
+      <button id="pingAllButton" class="primary">Ping widoczne</button>
+      <button id="refreshButton" title="Wczytaj ponownie listę z pliku">Odśwież</button>
+      <label class="autoPingToggle" title="Pinguje tylko aktualnie widoczne (przefiltrowane) urządzenia, w tle, cyklicznie">
+        <input type="checkbox" id="autoPingToggle">
+        Auto-ping widocznych, co
+        <select id="autoPingInterval">
+          <option value="60000">1 min</option>
+          <option value="300000" selected>5 min</option>
+          <option value="900000">15 min</option>
+        </select>
+      </label>
+      <button id="openAddButton">Dodaj urządzenie</button>
+      <button id="toggleAdvancedButton">Filtry</button>
+    </section>
+
+    <section class="advanced collapsed" id="advancedPanel">
+      <label>
+        Status
+        <select id="statusFilter">
+          <option value="">Dowolny</option>
+          <option value="online">Online</option>
+          <option value="offline">Offline</option>
+          <option value="unknown">Nieznany</option>
+        </select>
+      </label>
+      <label>
+        Adresowanie
+        <select id="addressModeFilter">
+          <option value="">Dowolne</option>
+          <option value="dhcp">DHCP / po nazwie</option>
+          <option value="static">Stałe IP</option>
+        </select>
+      </label>
+      <label>
+        Słowo kluczowe
+        <input id="keywordFilter" placeholder="np. etykiety">
+      </label>
+      <button id="clearFiltersButton" type="button">Wyczyść filtry</button>
+    </section>
+
+    <section class="quickPing">
+      <input id="namePingInput" type="text" placeholder="Ping po nazwie, np. T104-0192">
+      <button id="namePingButton">Sprawdź nazwę</button>
+      <div id="namePingResult" class="resultText"></div>
+    </section>
+
+    <section class="summary" id="summary"></section>
+
+    <section class="editor collapsed" id="editorPanel">
+      <div class="editorHeader">
+        <div>
+          <h2 id="editorTitle">Dodaj urządzenie</h2>
+          <p>Zmiany zapisują się do pliku dopiero po wpisaniu hasła i kliknięciu zapisu.</p>
+        </div>
+        <button id="closeEditorButton" type="button">Schowaj</button>
+      </div>
+      <form id="deviceForm">
+        <input type="hidden" id="editName">
+        <div class="formGrid">
+          <label>
+            Nazwa
+            <input id="deviceName" required placeholder="T104-0192">
+          </label>
+          <label>
+            Adresowanie
+            <select id="deviceAddressMode">
+              <option value="dhcp">DHCP / po nazwie</option>
+              <option value="static">Stałe IP</option>
+            </select>
+          </label>
+          <label>
+            IP
+            <input id="deviceIp" placeholder="Opcjonalnie, np. 192.168.1.192">
+          </label>
+          <label>
+            Typ
+            <select id="deviceType"></select>
+          </label>
+          <label>
+            Obszar
+            <select id="deviceArea"></select>
+          </label>
+          <label>
+            Słowa kluczowe
+            <input id="deviceKeywords" placeholder="terminal, etykiety, linia 1">
+          </label>
+          <label id="numeratorField" class="hidden">
+            Numerator
+            <input id="deviceNumerator" placeholder="np. numerator wagi">
+          </label>
+          <label>
+            Notatka
+            <input id="deviceNote" placeholder="Opis lub lokalizacja">
+          </label>
+        </div>
+        <div class="formActions">
+          <button type="submit" class="primary">Dodaj / aktualizuj</button>
+          <button id="saveButton" type="button">Zapisz zmiany</button>
+          <button type="button" id="deleteEditButton" class="danger hidden">Usuń edytowane</button>
+          <button type="button" id="clearFormButton">Wyczyść</button>
+          <button type="button" id="forgetPasswordButton" class="linkButton">Zmień hasło zapisu</button>
+          <span id="editHint" class="muted"></span>
+        </div>
+      </form>
+      <div class="dictionary">
+        <div>
+          <h3>Typy</h3>
+          <div class="inlineAdd">
+            <input id="newTypeInput" placeholder="np. skaner">
+            <button id="addTypeButton" type="button">Dodaj typ</button>
+          </div>
+          <div id="typeChips" class="chips"></div>
+        </div>
+        <div>
+          <h3>Obszary</h3>
+          <div class="inlineAdd">
+            <input id="newAreaInput" placeholder="np. LINIA 1">
+            <button id="addAreaButton" type="button">Dodaj obszar</button>
+          </div>
+          <div id="areaChips" class="chips"></div>
+        </div>
+      </div>
+      <div class="tunnelSettings">
+        <h3>Tunel SSH do VNC (terminale)</h3>
+        <p class="muted">Przycisk „Tunel SSH" przy terminalu otworzy nowe okno konsoli z poleceniem SSH — hasło wpisujesz tam ręcznie, potem sam odpalasz TigerVNC na localhost:&lt;lokalny port&gt;.</p>
+        <div class="tunnelGrid">
+          <label>
+            Domyślny użytkownik SSH
+            <input id="sshUserInput" placeholder="np. operator">
+          </label>
+          <label>
+            Lokalny port VNC
+            <input id="vncLocalPortInput" type="number" min="1" max="65535" placeholder="5900">
+          </label>
+          <label>
+            Zdalny port VNC
+            <input id="vncRemotePortInput" type="number" min="1" max="65535" placeholder="5900">
+          </label>
+        </div>
+        <button id="saveTunnelSettingsButton" type="button">Zapisz ustawienia tunelu</button>
+      </div>
+    </section>
+
+    <section class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th>IP</th>
+            <th>Lokacja</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+        <tbody id="devicesBody"></tbody>
+      </table>
+    </section>
+
+    <section class="pagination">
+      <label>
+        Na stronie
+        <select id="pageSizeSelect">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="all">Wszystkie</option>
+        </select>
+      </label>
+      <div class="pageControls">
+        <button id="prevPageButton" type="button">Poprzednia</button>
+        <span id="pageInfo"></span>
+        <button id="nextPageButton" type="button">Następna</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="passwordModal" class="modalOverlay hidden">
+    <div class="modalBox">
+      <h3>Hasło administratora</h3>
+      <p class="muted">Wymagane do zapisu zmian w pliku na dysku. Zostanie zapamiętane w tej karcie przeglądarki do jej zamknięcia.</p>
+      <form id="passwordForm">
+        <input id="passwordModalInput" type="password" placeholder="Hasło" autocomplete="current-password">
+        <div class="modalActions">
+          <button type="button" id="passwordModalCancel">Anuluj</button>
+          <button type="submit" class="primary">Potwierdź</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

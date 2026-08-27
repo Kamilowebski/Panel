@@ -1,0 +1,27 @@
+[
+  {
+    "name": "T101-0001",
+    "ip": "192.168.1.101",
+    "keywords": ["terminal", "przyklad"],
+    "area": "EXPORT",
+    "note": "Przykladowy terminal - podmien na wlasne dane",
+    "type": "terminal",
+    "areaCode": "101",
+    "site": "Zaklad 101",
+    "number": "0001",
+    "addressMode": "dhcp"
+  },
+  {
+    "name": "B101-0001",
+    "ip": "192.168.1.201",
+    "keywords": ["bizerba", "waga"],
+    "area": "ROZBIOR",
+    "note": "Przykladowa Bizerba - podmien na wlasne dane",
+    "type": "bizerba",
+    "areaCode": "101",
+    "site": "Zaklad 101",
+    "number": "0001",
+    "addressMode": "static",
+    "numerator": ""
+  }
+]
